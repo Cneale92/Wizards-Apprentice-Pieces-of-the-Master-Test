@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ApolloProvider } from "@apollo/client";
 import client from "./graphql/client";
-import { Game } from "./scenes/GameScene";
+import GameScene from "./scenes/GameScene"; // Import GameScene
 
 const App = () => {
+  useEffect(() => {
+    // Initialize the Phaser game when the component mounts
+    new GameScene(); // Instantiate GameScene or handle Phaser initialization here
+  }, []);
+
   return (
     <ApolloProvider client={client}>
-      <Game />
+      {/* Add any additional React components here */}
     </ApolloProvider>
   );
 };
