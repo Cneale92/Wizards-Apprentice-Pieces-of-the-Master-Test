@@ -11,7 +11,10 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.add
-      .text(400, 100, "Start Menu", { fontSize: "32px", fill: "#fff" })
+      .text(400, 100, "Wizards Apprentice: Pieces of the Master", {
+        fontSize: "28px",
+        fill: "#fff",
+      })
       .setOrigin(0.5);
 
     // Menu options
@@ -19,46 +22,67 @@ class GameScene extends Phaser.Scene {
       { text: "New Game", action: () => this.startNewGame() },
       { text: "Load Game", action: this.loadGame.bind(this) },
       { text: "Login", action: this.login.bind(this) },
-      { text: "Register", action: this.register.bind(this) },
       { text: "Settings", action: this.openSettings.bind(this) },
       { text: "Exit", action: this.exitGame.bind(this) },
     ];
 
-    this.menuText = this.menuOptions.map((option, index) =>
-      this.add
+    // Create menu text objects and set them interactive
+    this.menuText = this.menuOptions.map((option, index) => {
+      const text = this.add
         .text(400, 200 + index * 50, option.text, {
           fontSize: "24px",
           fill: "#fff",
         })
         .setOrigin(0.5)
-    );
+        .setInteractive(); // Make the text interactive
 
-    // Input handling
-    this.input.keyboard.on("keydown-ENTER", () => {
-      this.menuOptions[this.selectedOption].action();
+      // Add hover events
+      text.on("pointerover", () => {
+        text.setFill("#ff0"); // Highlight on hover
+      });
+
+      text.on("pointerout", () => {
+        text.setFill("#fff"); // Remove highlight
+      });
+
+      // Add left click event
+      text.on("pointerdown", () => {
+        option.action(); // Call the associated action
+      });
+
+      return text;
     });
 
-    // Navigate through the menu
-    this.selectedOption = 0;
-    this.updateMenuSelection();
+    // Add full-screen button
+    this.fullscreenButton = this.add
+      .text(750, 550, "[ ]", { fontSize: "24px", fill: "#fff" }) // Use brackets for the button
+      .setOrigin(0.5)
+      .setInteractive()
+      .setPadding(5);
 
-    this.input.keyboard.on("keydown-UP", () => {
-      this.selectedOption =
-        (this.selectedOption - 1 + this.menuOptions.length) %
-        this.menuOptions.length;
-      this.updateMenuSelection();
+    this.fullscreenButton.on("pointerover", () => {
+      this.fullscreenButton.setFill("#ff0"); // Highlight on hover
     });
 
-    this.input.keyboard.on("keydown-DOWN", () => {
-      this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-      this.updateMenuSelection();
+    this.fullscreenButton.on("pointerout", () => {
+      this.fullscreenButton.setFill("#fff"); // Remove highlight
+    });
+
+    this.fullscreenButton.on("pointerdown", () => {
+      this.toggleFullscreen(); // Toggle fullscreen
     });
   }
 
-  updateMenuSelection() {
-    this.menuText.forEach((text, index) => {
-      text.setFill(index === this.selectedOption ? "#ff0" : "#fff"); // Highlight the selected option
-    });
+  toggleFullscreen() {
+    const canvas = this.game.canvas;
+
+    if (!document.fullscreenElement) {
+      canvas.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
   }
 
   startNewGame() {
@@ -75,11 +99,6 @@ class GameScene extends Phaser.Scene {
     // Implement login functionality
   }
 
-  register() {
-    console.log("Register clicked!");
-    // Implement register functionality
-  }
-
   openSettings() {
     console.log("Settings clicked!");
     // Implement settings functionality
@@ -91,7 +110,7 @@ class GameScene extends Phaser.Scene {
   }
 
   update() {
-    // Game loop logic (e.g., handling turns)
+    // Game loop logic (if any)
   }
 }
 
@@ -103,17 +122,28 @@ class WorldMapScene extends Phaser.Scene {
 
   preload() {
     // Load assets for the world map
-    this.load.image("playerSprite", "path/to/playerSprite.png"); // Update the path
+    this.load.image("placeholderWorldMap", "src/assets/placeholderWorldMap.png"); // Update the path
+    this.load.image("placeholderCharacter", "src/assets/placeholderCharacter.png"); // Ensure you load your player sprite here
   }
 
   create() {
+    // Add the world map image
+    const mapImage = this.add.image(400, 300, "placeholderWorldMap"); // Center it in the canvas
+    mapImage.setDisplaySize(this.cameras.main.width, this.cameras.main.height); // Resize to fit the screen
+
     this.add
       .text(400, 50, "World Map", { fontSize: "32px", fill: "#fff" })
       .setOrigin(0.5);
 
     // Create the player sprite
-    this.player = this.physics.add.sprite(400, 300, "playerSprite");
+    this.player = this.physics.add.sprite(400, 300, "placeholderCharacter");
     this.player.setCollideWorldBounds(true); // Prevents the player from going out of bounds
+
+    const scaleFactor = 0.1; // Adjust this factor to make the sprite smaller
+    this.player.setDisplaySize(
+      this.player.width * scaleFactor,
+      this.player.height * scaleFactor
+    );
 
     // Create battle instances
     this.battleZone = this.add.zone(500, 300, 100, 100).setOrigin(0);
@@ -190,5 +220,6 @@ const config = {
 };
 
 const Game = new Phaser.Game(config);
-export { GameScene }; // Add this line to export GameScene
-export default Game; // This remains for the Phaser Game instance
+export default Game;
+export { GameScene };
+
