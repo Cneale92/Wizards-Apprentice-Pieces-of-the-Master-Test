@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ApolloProvider } from "@apollo/client";
 import client from "./graphql/client";
 import GameScene from "./scenes/GameScene"; // Import GameScene
